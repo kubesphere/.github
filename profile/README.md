@@ -1,4 +1,5 @@
 ## Hey, this is KubeSphere community 👋
+<img width="1383" alt="kubesphere-logo" src="https://user-images.githubusercontent.com/71369943/134167452-2ca01615-af4f-42bc-bed7-7d2beb0fe728.png">
 
 KubeSphere is a distributed operating system for cloud-native application management, using Kubernetes as its kernel. It provides a plug-and-play architecture, allowing third-party applications to be seamlessly integrated into its ecosystem.
 
