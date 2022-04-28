@@ -4,7 +4,7 @@
 
 There are three open-source projects that are not under the KubeSphere GitHub organization, but are also open-sourced and maintained by the KubeSphere team.
 
-- [OpenFunction](https://github.com/OpenFunction/OpenFunction): Cloud-native FaaS (Function as a Service) platform built on Knative, Dapr, KEDA, and Buildpacks.
+- [OpenFunction (CNCF Sandbox)](https://github.com/OpenFunction/OpenFunction): Cloud-native FaaS (Function as a Service) platform built on Knative, Dapr, KEDA, and Buildpacks.
 - [OpenELB (CNCF Sandbox)](https://github.com/openelb/openelb): Load balancer implementation for Kubernetes in bare-metal, edge, and virtualization.
 - [Fluent Operator](https://github.com/fluent/fluent-operator): Fluent Operator provides great flexibility in building a logging layer based on Fluent Bit and Fluentd.
 
