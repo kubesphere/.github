@@ -1,6 +1,6 @@
 ## Hey, this is KubeSphere community 👋
 
-|  [👩‍💻 Quick Start](https://github.com/kubesphere/kubesphere#installation) | [📚 Documentation](https://kubesphere.io/docs/) | [💻 Video](https://www.youtube.com/channel/UCyTdUQUYjf7XLjxECx63Hpw) | [🙋‍ Contribution](https://kubesphere.io/contribution/) | [🙌 Slack](https://join.slack.com/t/kubesphere/shared_invite/enQtNTE3MDIxNzUxNzQ0LTZkNTdkYWNiYTVkMTM5ZThhODY1MjAyZmVlYWEwZmQ3ODQ1NmM1MGVkNWEzZTRhNzk0MzM5MmY4NDc3ZWVhMjE) | [👀 Blog](https://kubesphere.io/blogs/) |
+|  [👩‍💻 Quick Start](https://github.com/kubesphere/kubesphere#installation) | [📚 Documentation](https://kubesphere.io/docs/v4.1/) | [💻 Video](https://www.youtube.com/channel/UCyTdUQUYjf7XLjxECx63Hpw) | [🙋‍ Contribution](https://kubesphere.io/contribution/) | [🙌 Slack](https://join.slack.com/t/kubesphere/shared_invite/enQtNTE3MDIxNzUxNzQ0LTZkNTdkYWNiYTVkMTM5ZThhODY1MjAyZmVlYWEwZmQ3ODQ1NmM1MGVkNWEzZTRhNzk0MzM5MmY4NDc3ZWVhMjE) | [👀 Blog](https://kubesphere.io/blogs/) |
 
 There are three open-source projects that are not under the KubeSphere GitHub organization, but are also open-sourced and maintained by the KubeSphere team.
 
