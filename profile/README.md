@@ -4,7 +4,7 @@
 
 🚀Embark on the KubeSphere journey and co-create the future of cloud-native technology! 🌟
 
-For those who love KubeSphere, don't miss out on this exciting extension development adventure! We sincerely invite you to dive deep into the 🎉[KubeSphere Extension Development Guide](https://dev-guide.kubesphere.io/extension-dev-guide/en/)and join us on the path of developing the KubeSphere project. 
+For those who love KubeSphere, don't miss out on this exciting extension development adventure! We sincerely invite you to dive deep into the 🎉[KubeSphere Extension Development Guide](https://dev-guide.kubesphere.io/extension-dev-guide/en/) and join us on the path of developing the KubeSphere project. 
 
 There are countless thrilling extension components waiting for you to explore, such as the powerful ✨[WhizardTelemetry](https://kubesphere.io/docs/v4.1/11-use-extensions/05-observability-platform/)!
 
