@@ -1,5 +1,10 @@
 name: Add Label on Project Status Change
 
+permissions:
+  contents: read
+  issues: write
+  projects: read
+
 on:
   workflow_dispatch:
     inputs:
