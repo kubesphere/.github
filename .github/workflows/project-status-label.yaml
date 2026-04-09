@@ -33,9 +33,9 @@ jobs:
                       }
                       fieldValues(first: 10) {
                         nodes {
-                          ... on ProjectV2ItemFieldValue {
+                          ... on ProjectV2ItemFieldSingleSelectValue {
                             field { name }
-                            value
+                            name
                           }
                         }
                       }
@@ -45,10 +45,10 @@ jobs:
               `, { id: context.payload.projects_v2_item.node_id });
 
               const statusField = item.fieldValues.nodes.find(f => f.field.name === "Status");
-              console.log("current status:", statusField?.value);
+              console.log("current status:", statusField?.name);
 
               if (
-                statusField?.value === "Need To Verify" &&
+                statusField?.name === "Need To Verify" &&
                 item.content?.number
               ) {
                 const issue = item.content;
