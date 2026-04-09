@@ -1,68 +1,24 @@
 name: Add Label on Project Status Change
 
-permissions:
-  issues: write
-  projects: read
-
 on:
   workflow_dispatch:
-  projects_v2_item:
-    types: [edited]
+  issues:
+    types: [labeled]
 
 jobs:
   add-label:
     runs-on: ubuntu-latest
     steps:
-      - name: Check project item status and add label
+      - name: Add label when status is set to Need To Verify
+        if: github.event.label.name == 'status: Need To Verify'
         uses: actions/github-script@v7
         with:
           script: |
-            try {
-              const { data: item } = await github.graphql(`
-                query($id: ID!) {
-                  node(id: $id) {
-                    ... on ProjectV2Item {
-                      content {
-                        ... on Issue {
-                          number
-                          repository {
-                            name
-                            owner { login }
-                          }
-                        }
-                      }
-                      fieldValues(first: 10) {
-                        nodes {
-                          ... on ProjectV2ItemFieldSingleSelectValue {
-                            field { name }
-                            name
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              `, { id: context.payload.projects_v2_item.node_id });
-
-              const statusField = item.fieldValues.nodes.find(f => f.field.name === "Status");
-              console.log("current status:", statusField?.name);
-
-              if (
-                statusField?.name === "Need To Verify" &&
-                item.content?.number
-              ) {
-                const issue = item.content;
-                await github.rest.issues.addLabels({
-                  owner: issue.repository.owner.login,
-                  repo: issue.repository.name,
-                  issue_number: issue.number,
-                  labels: ["kind/need-to-verify"]
-                });
-                console.log("✅ Label added：kind/need-to-verify");
-              } else {
-                console.log("ℹ️ Not a matching item, skip");
-              }
-            } catch (error) {
-              console.error("❌ Action failed：", error.message);
-              throw error;
-            }
+            const issue = context.issue;
+            await github.rest.issues.addLabels({
+              owner: issue.owner.login,
+              repo: issue.repo,
+              issue_number: issue.number,
+              labels: ["kind/need-to-verify"]
+            });
+            console.log("✅ Label added: kind/need-to-verify");
