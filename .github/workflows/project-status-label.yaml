@@ -1,68 +1,168 @@
 name: Add Label on Project Status Change
 
-permissions:
-  issues: write
-  projects: read
-
 on:
   workflow_dispatch:
-  projects_v2_item:
-    types: [edited]
+    inputs:
+      project_ids:
+        description: 'Project IDs (comma-separated, e.g., PVT_xxx,PVT_yyy)'
+        required: true
+        default: 'PVT_kwDOAjmOms4BMOXr'
+      status_value:
+        description: 'Status value to match'
+        required: false
+        default: 'Need To Verify'
+      label_to_add:
+        description: 'Label to add'
+        required: false
+        default: 'kind/need-to-verify'
+  schedule:
+    - cron: '0 * * * *'  # Every hour
 
 jobs:
   add-label:
     runs-on: ubuntu-latest
     steps:
-      - name: Check project item status and add label
+      - name: Check project items with specific status and add label
         uses: actions/github-script@v7
+        env:
+          PROJECT_IDS: ${{ github.event.inputs.project_ids || 'PVT_kwDOAjmOms4BMOXr' }}
+          STATUS_VALUE: ${{ github.event.inputs.status_value || 'Need To Verify' }}
+          LABEL_TO_ADD: ${{ github.event.inputs.label_to_add || 'kind/need-to-verify' }}
         with:
           script: |
-            try {
-              const { data: item } = await github.graphql(`
+            const projectIds = process.env.PROJECT_IDS.split(',').map(p => p.trim());
+            const statusValue = process.env.STATUS_VALUE;
+            const labelToAdd = process.env.LABEL_TO_ADD;
+            
+            console.log(`Projects: ${projectIds.join(', ')}`);
+            console.log(`Status: ${statusValue}, Label: ${labelToAdd}`);
+            
+            for (const projectId of projectIds) {
+              console.log(`\n=== Processing project: ${projectId} ===`);
+              
+              // Get the Status field ID
+              const fieldQuery = `
                 query($id: ID!) {
                   node(id: $id) {
-                    ... on ProjectV2Item {
-                      content {
-                        ... on Issue {
-                          number
-                          repository {
-                            name
-                            owner { login }
-                          }
-                        }
-                      }
-                      fieldValues(first: 10) {
+                    ... on ProjectV2 {
+                      fields(first: 20) {
                         nodes {
-                          ... on ProjectV2ItemFieldValue {
-                            field { name }
-                            value
+                          ... on ProjectV2Field {
+                            id
+                            name
+                          }
+                          ... on ProjectV2SingleSelectField {
+                            id
+                            name
+                            options {
+                              id
+                              name
+                            }
                           }
                         }
                       }
                     }
                   }
                 }
-              `, { id: context.payload.projects_v2_item.node_id });
-
-              const statusField = item.fieldValues.nodes.find(f => f.field.name === "Status");
-              console.log("current status:", statusField?.value);
-
-              if (
-                statusField?.value === "Need To Verify" &&
-                item.content?.number
-              ) {
-                const issue = item.content;
-                await github.rest.issues.addLabels({
-                  owner: issue.repository.owner.login,
-                  repo: issue.repository.name,
-                  issue_number: issue.number,
-                  labels: ["kind/need-to-verify"]
-                });
-                console.log("✅ Label added：kind/need-to-verify");
-              } else {
-                console.log("ℹ️ Not a matching item, skip");
+              `;
+              
+              const { data: project } = await github.graphql(fieldQuery, { id: projectId });
+              if (!project || !project.fields) {
+                console.log(`Could not fetch project ${projectId}, skipping`);
+                continue;
               }
-            } catch (error) {
-              console.error("❌ Action failed：", error.message);
-              throw error;
+              
+              const statusField = project.fields.nodes.find(f => f.name === "Status");
+              
+              if (!statusField) {
+                console.log("Status field not found in project");
+                continue;
+              }
+              
+              // Find the option ID for the target status
+              const statusOption = statusField.options?.find(o => o.name === statusValue);
+              if (!statusOption) {
+                console.log(`Status option "${statusValue}" not found`);
+                continue;
+              }
+              
+              console.log(`Status field ID: ${statusField.id}`);
+              
+              // Query items in the project
+              const itemsQuery = `
+                query($id: ID!) {
+                  node(id: $id) {
+                    ... on ProjectV2 {
+                      items(first: 50) {
+                        nodes {
+                          id
+                          content {
+                            ... on Issue {
+                              number
+                              title
+                              state
+                              repository {
+                                name
+                                owner { login }
+                              }
+                              labels {
+                                nodes {
+                                  name
+                                }
+                              }
+                            }
+                          }
+                          fieldValues(first: 20) {
+                            nodes {
+                              ... on ProjectV2ItemFieldSingleSelectValue {
+                                field { id }
+                                name
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              `;
+              
+              const { data: projectWithItems } = await github.graphql(itemsQuery, { id: projectId });
+              
+              // Filter items with matching status and without the label
+              const items = projectWithItems.items.nodes;
+              console.log(`Found ${items.length} items in project`);
+              
+              let labelAdded = 0;
+              for (const item of items) {
+                const statusFieldValue = item.fieldValues.nodes.find(
+                  f => f.field?.id === statusField.id
+                );
+                
+                if (statusFieldValue?.name === statusValue && item.content && item.content.state === 'OPEN') {
+                  const issue = item.content;
+                  const hasLabel = issue.labels.nodes.some(l => l.name === labelToAdd);
+                  
+                  if (!hasLabel) {
+                    console.log(`Adding label to issue #${issue.number}: ${issue.title}`);
+                    try {
+                      await github.rest.issues.addLabels({
+                        owner: issue.repository.owner.login,
+                        repo: issue.repository.name,
+                        issue_number: issue.number,
+                        labels: [labelToAdd]
+                      });
+                      labelAdded++;
+                    } catch (e) {
+                      console.error(`Failed to add label to #${issue.number}: ${e.message}`);
+                    }
+                  } else {
+                    console.log(`Issue #${issue.number} already has label, skip`);
+                  }
+                }
+              }
+              
+              console.log(`Project ${projectId}: Added label to ${labelAdded} issues`);
             }
+            
+            console.log('\n=== Done ===');
