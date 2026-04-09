@@ -100,6 +100,7 @@ jobs:
                             ... on Issue {
                               number
                               title
+                              state
                               repository {
                                 name
                                 owner { login }
@@ -138,7 +139,7 @@ jobs:
                   f => f.field?.id === statusField.id
                 );
                 
-                if (statusFieldValue?.name === statusValue && item.content) {
+                if (statusFieldValue?.name === statusValue && item.content && item.content.state === 'OPEN') {
                   const issue = item.content;
                   const hasLabel = issue.labels.nodes.some(l => l.name === labelToAdd);
                   
